@@ -3,7 +3,6 @@ import Employees from './pages/Employees';
 import EmployeeForm from './components/EmployeeForm';
 import Orders from './pages/Orders';
 import OrderForm from './components/OrderForm';
-import './App.css';
 
 function App() {
     return (
