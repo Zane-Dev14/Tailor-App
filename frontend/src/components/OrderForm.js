@@ -1,48 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { createOrder, getOrders, updateOrder } from '../api/api';
-import { useParams, useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const OrderForm = () => {
-    const [order, setOrder] = useState({ description: '', amount: '' });
-    const { id } = useParams();
-    const history = useHistory();
-
-    useEffect(() => {
-        if (id) {
-            async function fetchOrder() {
-                const result = await getOrders();
-                const ord = result.data.find(o => o._id === id);
-                setOrder(ord);
-            }
-            fetchOrder();
-        }
-    }, [id]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setOrder({ ...order, [name]: value });
-    };
+    const [date, setDate] = useState('');
+    const [customerName, setCustomerName] = useState('');
+    const [lineItem, setLineItem] = useState(1);
+    const [description, setDescription] = useState('');
+    const [deliveryDate, setDeliveryDate] = useState('');
+    const [estimateAmount, setEstimateAmount] = useState('');
+    const [remarks, setRemarks] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (id) {
-            await updateOrder(id, order);
-        } else {
-            await createOrder(order);
+
+        try {
+            const response = await axios.post('/api/orders', { date, customerName, lineItem, description, deliveryDate, estimateAmount, remarks });
+            console.log(response.data);
+        } catch (error) {
+            console.error(error);
         }
-        history.push('/orders');
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <label>
-                Description:
-                <input type="text" name="description" value={order.description} onChange={handleChange} />
-            </label>
-            <label>
-                Amount:
-                <input type="text" name="amount" value={order.amount} onChange={handleChange} />
-            </label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Customer Name" required />
+            <input type="number" value={lineItem} onChange={(e) => setLineItem(Number(e.target.value))} min="1" placeholder="Line Item" required />
+            <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" required />
+            <input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} required />
+            <input type="number" value={estimateAmount} onChange={(e) => setEstimateAmount(Number(e.target.value))} placeholder="Estimate Amount" required />
+            <input type="text" value={remarks} onChange={(e) => setRemarks(e.target.value)} placeholder="Remarks" />
             <button type="submit">Submit</button>
         </form>
     );

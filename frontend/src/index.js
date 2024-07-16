@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import './index.css';
+import './styles/tailwind.css';
 
 ReactDOM.render(
   <React.StrictMode>

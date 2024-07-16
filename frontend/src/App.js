@@ -1,22 +1,25 @@
+import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Employees from './pages/Employees';
-import EmployeeForm from './components/EmployeeForm';
-import Orders from './pages/Orders';
+import Navbar from './components/Navbar';
+import EmployeeList from './components/EmployeeList';
+import EmployeeEditForm from './components/EmployeeEditForm';
+import CustomerForm from './components/CustomerForm';
 import OrderForm from './components/OrderForm';
+import Home from './components/Home';
 
-function App() {
+const App = () => {
     return (
         <Router>
+            <Navbar />
             <Switch>
-                <Route path="/employees" component={Employees} />
-                <Route path="/employee/new" component={EmployeeForm} />
-                <Route path="/employee/edit/:id" component={EmployeeForm} />
-                <Route path="/orders" component={Orders} />
-                <Route path="/order/new" component={OrderForm} />
-                <Route path="/order/edit/:id" component={OrderForm} />
+                <Route path="/" exact component={Home} />
+                <Route path="/employees" exact component={EmployeeList} />
+                <Route path="/employees/edit/:id" component={EmployeeEditForm} />
+                <Route path="/customers" component={CustomerForm} />
+                <Route path="/orders" component={OrderForm} />
             </Switch>
         </Router>
     );
-}
+};
 
 export default App;
