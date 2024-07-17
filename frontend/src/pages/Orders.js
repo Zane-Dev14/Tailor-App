@@ -6,25 +6,27 @@ const Orders = () => {
   const [form, setForm] = useState({ 
     date: '', 
     customerName: '', 
-    orderId: '', 
     lineItem: '', 
     description: '', 
     deliveryDate: '', 
     estimateAmount: '', 
     remarks: '' 
   });
+  const [editMode, setEditMode] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await api.get('/api/orders');
-        setOrders(res.data);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      }
-    };
     fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const res = await api.get('/orders');
+      setOrders(res.data);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,21 +36,57 @@ const Orders = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/orders', form);
+      if (editMode) {
+        await api.put(`/orders/${currentId}`, form);
+        setEditMode(false);
+        setCurrentId(null);
+      } else {
+        await api.post('/orders', form);
+      }
       setForm({ 
         date: '', 
         customerName: '', 
-        orderId: '', 
         lineItem: '', 
         description: '', 
         deliveryDate: '', 
         estimateAmount: '', 
-        remarks: '' 
+        remarks: ''
       });
-      const res = await api.get('/api/orders');
-      setOrders(res.data);
+      fetchOrders(); // Fetch updated orders list
     } catch (error) {
-      console.error('Error adding order:', error);
+      console.error(`Error ${editMode ? 'updating' : 'adding'} order:`, error);
+    }
+  };
+
+  const handleEdit = async (id) => {
+    try {
+      const order = orders.find(order => order.orderId === id);
+      if (!order) {
+        console.error(`Order with ID ${id} not found.`);
+        return;
+      }
+      setEditMode(true);
+      setCurrentId(id);
+      setForm({
+        date: order.date,
+        customerName: order.customerName,
+        lineItem: order.lineItem,
+        description: order.description || '',
+        deliveryDate: order.deliveryDate || '',
+        estimateAmount: order.estimateAmount || '',
+        remarks: order.remarks || ''
+      });
+    } catch (error) {
+      console.error('Error editing order:', error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/orders/${id}`);
+      fetchOrders(); // Fetch updated orders list
+    } catch (error) {
+      console.error('Error deleting order:', error);
     }
   };
 
@@ -72,16 +110,6 @@ const Orders = () => {
             type="text" 
             name="customerName" 
             value={form.customerName} 
-            onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Order ID</label>
-          <input 
-            type="text" 
-            name="orderId" 
-            value={form.orderId} 
             onChange={handleChange} 
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
@@ -136,19 +164,21 @@ const Orders = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">Add Order</button>
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">
+          {editMode ? 'Update Order' : 'Add Order'}
+        </button>
       </form>
       <table className="min-w-full bg-white rounded-lg shadow-md">
         <thead>
           <tr>
             <th className="px-4 py-2">Date</th>
             <th className="px-4 py-2">Customer Name</th>
-            <th className="px-4 py-2">Order ID</th>
             <th className="px-4 py-2">Line Item</th>
             <th className="px-4 py-2">Description</th>
             <th className="px-4 py-2">Delivery Date</th>
             <th className="px-4 py-2">Estimate Amount</th>
             <th className="px-4 py-2">Remarks</th>
+            <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -156,12 +186,15 @@ const Orders = () => {
             <tr key={order.orderId}>
               <td className="border px-4 py-2">{order.date}</td>
               <td className="border px-4 py-2">{order.customerName}</td>
-              <td className="border px-4 py-2">{order.orderId}</td>
               <td className="border px-4 py-2">{order.lineItem}</td>
               <td className="border px-4 py-2">{order.description}</td>
               <td className="border px-4 py-2">{order.deliveryDate}</td>
               <td className="border px-4 py-2">{order.estimateAmount}</td>
               <td className="border px-4 py-2">{order.remarks}</td>
+              <td className="border px-4 py-2">
+                <button className="bg-blue-500 text-white px-4 py-1 rounded-md mr-2" onClick={() => handleEdit(order.orderId)}>Edit</button>
+                <button className="bg-red-500 text-white px-4 py-1 rounded-md" onClick={() => handleDelete(order.orderId)}>Delete</button>
+              </td>
             </tr>
           ))}
         </tbody>
