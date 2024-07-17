@@ -1,62 +1,62 @@
-  import React, { useState, useEffect } from 'react';
-  import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from '../api/api';
+import React, { useState, useEffect } from 'react';
+import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from '../api/api';
 
-  const Employees = () => {
-    const [employees, setEmployees] = useState([]);
-    const [form, setForm] = useState({ empName: '', mobile: '', dailyWages: '' });
-    const [editMode, setEditMode] = useState(false);
-    const [currentId, setCurrentId] = useState(null);
+const Employees = () => {
+  const [employees, setEmployees] = useState([]);
+  const [form, setForm] = useState({ empName: '', mobile: '', dailyWages: '' });
+  const [editMode, setEditMode] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
 
-    useEffect(() => {
-      const fetchEmployees = async () => {
-        try {
-          const res = await getEmployees();
-          setEmployees(res.data);
-        } catch (error) {
-          console.error('Error fetching employees:', error);
-        }
-      };
-      fetchEmployees();
-    }, []);
-
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setForm({ ...form, [name]: value });
-    };
-
-    const handleSubmit = async (e) => {
-      e.preventDefault();
+  useEffect(() => {
+    const fetchEmployees = async () => {
       try {
-        if (editMode) {
-          await updateEmployee(currentId, form);
-          setEditMode(false);
-          setCurrentId(null);
-        } else {
-          await createEmployee(form);
-        }
-        setForm({ empName: '', mobile: '', dailyWages: '' });
         const res = await getEmployees();
-        setEmployees(res.data);
+        setEmployees(res);
       } catch (error) {
-        console.error(`Error ${editMode ? 'updating' : 'adding'} employee:`, error);
+        console.error('Error fetching employees:', error);
       }
     };
+    fetchEmployees();
+  }, []);
 
-    const handleEdit = (employee) => {
-      setEditMode(true);
-      setCurrentId(employee._id);
-      setForm({ empName: employee.empName, mobile: employee.mobile, dailyWages: employee.dailyWages });
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
 
-    const handleDelete = async (id) => {
-      try {
-        await deleteEmployee(id);
-        const res = await getEmployees();
-        setEmployees(res.data);
-      } catch (error) {
-        console.error('Error deleting employee:', error);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editMode) {
+        await updateEmployee(currentId, form);
+        setEditMode(false);
+        setCurrentId(null);
+      } else {
+        await createEmployee(form);
       }
-    };
+      setForm({ empName: '', mobile: '', dailyWages: '' });
+      const res = await getEmployees();
+      setEmployees(res);
+    } catch (error) {
+      console.error(`Error ${editMode ? 'updating' : 'adding'} employee:`, error);
+    }
+  };
+
+  const handleEdit = (employee) => {
+    setEditMode(true);
+    setCurrentId(employee._id);
+    setForm({ empName: employee.empName, mobile: employee.mobile, dailyWages: employee.dailyWages });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteEmployee(id);
+      const res = await getEmployees();
+      setEmployees(res);
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+    }
+  };
 
     return (
       <div className="bg-white p-6 rounded-lg shadow-md">
