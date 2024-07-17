@@ -1,6 +1,8 @@
 import axios from 'axios';
-
-const API = axios.create({ baseURL: 'http://localhost:3000' });
+// api.js
+const API = axios.create({
+  baseURL: 'http://localhost:3000/api',
+});
 
 export const createEmployee = (employee) => API.post('/employees', employee);
 export const getEmployees = () => API.get('/employees');
@@ -11,3 +13,5 @@ export const createOrder = (order) => API.post('/orders', order);
 export const getOrders = () => API.get('/orders');
 export const updateOrder = (id, order) => API.put(`/orders/${id}`, order);
 export const deleteOrder = (id) => API.delete(`/orders/${id}`);
+
+export default API;

@@ -84,8 +84,8 @@ const Customers = () => {
         </thead>
         <tbody>
           {customers.map((customer) => (
-            <tr key={customer.customerId}>
-              <td className="border px-4 py-2">{customer.customerId}</td>
+            <tr key={customer._id}>
+              <td className="border px-4 py-2">{customer._id}</td>
               <td className="border px-4 py-2">{customer.customerName}</td>
               <td className="border px-4 py-2">{customer.mobile}</td>
               <td className="border px-4 py-2">{customer.place}</td>

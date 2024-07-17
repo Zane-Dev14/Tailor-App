@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
@@ -6,10 +7,13 @@ const connectDB = async () => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
+
+        mongoose.set('strictQuery', true);
+
         console.log('MongoDB Connected');
-    } catch (error) {
-        console.error('MongoDB Connection Error:', error.message);
-        process.exit(1); // Exit process with failure
+    } catch (err) {
+        console.error('MongoDB connection error:', err.message);
+        process.exit(1); 
     }
 };
 

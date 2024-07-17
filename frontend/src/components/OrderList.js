@@ -13,14 +13,17 @@ const OrderList = () => {
     }, []);
 
     return (
-        <div>
-            <h2>Order List</h2>
-            <ul>
-                {orders.map(order => (
-                    <li key={order._id}>{order.description} - {order.amount}</li>
-                ))}
-            </ul>
-        </div>
+        <div className="max-w-2xl mx-auto mt-8">
+    <h2 className="text-2xl font-bold mb-4">Order List</h2>
+    <ul className="divide-y divide-gray-200">
+        {orders.map(order => (
+            <li key={order._id} className="py-4">
+                <p className="text-lg font-medium">{order.description} - {order.amount}</p>
+            </li>
+        ))}
+    </ul>
+</div>
+
     );
 };
 

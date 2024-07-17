@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/api'; // Assuming this is your custom Axios instance
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -16,8 +16,12 @@ const Orders = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const res = await axios.get('/api/orders');
-      setOrders(res.data);
+      try {
+        const res = await api.get('/api/orders');
+        setOrders(res.data);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
     };
     fetchOrders();
   }, []);
@@ -29,19 +33,23 @@ const Orders = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post('/api/orders', form);
-    setForm({ 
-      date: '', 
-      customerName: '', 
-      orderId: '', 
-      lineItem: '', 
-      description: '', 
-      deliveryDate: '', 
-      estimateAmount: '', 
-      remarks: '' 
-    });
-    const res = await axios.get('/api/orders');
-    setOrders(res.data);
+    try {
+      await api.post('/api/orders', form);
+      setForm({ 
+        date: '', 
+        customerName: '', 
+        orderId: '', 
+        lineItem: '', 
+        description: '', 
+        deliveryDate: '', 
+        estimateAmount: '', 
+        remarks: '' 
+      });
+      const res = await api.get('/api/orders');
+      setOrders(res.data);
+    } catch (error) {
+      console.error('Error adding order:', error);
+    }
   };
 
   return (
