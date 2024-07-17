@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/api'; // Assuming this is your custom Axios instance
+import api from '../api/api';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -89,6 +89,7 @@ const Orders = () => {
       console.error('Error deleting order:', error);
     }
   };
+
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
