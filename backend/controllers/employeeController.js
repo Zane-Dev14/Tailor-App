@@ -3,7 +3,9 @@ const Employee = require('../models/Employee');
 exports.createEmployee = async (req, res) => {
   try {
     const employee = new Employee(req.body);
+
     await employee.save();
+     
     res.status(201).json(employee);
   } catch (error) {
     res.status(400).json({ message: error.message });
