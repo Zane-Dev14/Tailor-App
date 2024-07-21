@@ -1,49 +1,45 @@
-      // api.js
-      import axios from 'axios';
+import axios from 'axios';
 
-      const API = axios.create({
-        baseURL: 'http://localhost:3000/api', // Adjust this base URL according to your backend setup
-      });
+const API = axios.create({
+  baseURL: 'http://localhost:3000/api', // Adjust this base URL according to your backend setup
+});
 
-      // Function to create an employee
-      export const createEmployee = async (employee) => {
-        try {
-          const response = await API.post('/employees', employee);
-          return response.data;
-        } catch (error) {
-          throw error.response.data;
-        }
-      };
+export const createEmployee = async (employee) => {
+  try {
+      const response = await API.post('/employees', employee);
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
 
-      // Function to get all employees
-      export const getEmployees = async () => {
-        try {
-          const response = await API.get('/employees');
-          return response.data;
-        } catch (error) {
-          throw error.response.data;
-        }
-      };
+export const getEmployees = async () => {
+  try {
+      const response = await API.get('/employees');
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
 
-      // Function to update an employee by ID
-      export const updateEmployee = async (id, employee) => {
-        try {
-          const response = await API.put(`/employees/${id}`, employee);
-          return response.data;
-        } catch (error) {
-          throw error.response.data;
-        }
-      };
+export const updateEmployee = async (id, employee) => {
+  try {
+      const response = await API.put(`/employees/${id}`, employee);
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
 
-      // Function to delete an employee by ID
-      export const deleteEmployee = async (id) => {
-        try {
-          const response = await API.delete(`/employees/${id}`);
-          return response.data;
-        } catch (error) {
-          throw error.response.data;
-        }
-      };
+export const deleteEmployee = async (id) => {
+  try {
+      const response = await API.delete(`/employees/${id}`);
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
+    
 
      // Add the following functions to api.js
 
@@ -121,5 +117,5 @@ export const deleteCustomer = async (id) => {
       throw error.response.data;
   }
 };
-
+    
       export default API;

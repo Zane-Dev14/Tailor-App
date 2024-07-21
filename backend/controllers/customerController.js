@@ -4,7 +4,7 @@ exports.createOrUpdateCustomer = async (req, res) => {
     try {
         const { name, mobile, place, remarks } = req.body;
         const formattedName = name
-            .toLowerCase()
+            .toLowerCase()  
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');

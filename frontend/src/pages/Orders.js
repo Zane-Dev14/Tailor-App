@@ -172,7 +172,7 @@ const Orders = () => {
     {editMode ? 'Update Order' : 'Add Order'}
   </button>
 </form>
-
+    
       <table className="min-w-full bg-white rounded-lg shadow-md">
         <thead>
           <tr>
