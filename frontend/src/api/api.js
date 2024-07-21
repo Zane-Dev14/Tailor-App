@@ -86,5 +86,40 @@ export const deleteOrder = async (id) => {
     throw error.response.data;
   }
 };
+export const createCustomer = async (customer) => {
+  try {
+      const response = await API.post('/customers', customer);
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
+
+export const getCustomers = async () => {
+  try {
+      const response = await API.get('/customers');
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
+
+export const updateCustomer = async (id, customer) => {
+  try {
+      const response = await API.put(`/customers/${id}`, customer);
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
+
+export const deleteCustomer = async (id) => {
+  try {
+      const response = await API.delete(`/customers/${id}`);
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
 
       export default API;

@@ -112,25 +112,29 @@ const Employees = () => {
           {errors.empName && <p className="text-red-500 text-sm">{errors.empName}</p>}
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700">Mobile Number</label>
-          <input 
-            type="text" 
-            name="mobile" 
-            value={form.mobile} 
-            onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-          {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile}</p>}
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Daily Wages</label>
-          <input 
-            type="text" 
-            name="dailyWages" 
-            value={form.dailyWages} 
-            onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
+  <label className="block text-gray-700">Mobile Number</label>
+  <input 
+    type="tel" 
+    name="mobile" 
+    value={form.mobile} 
+    onChange={handleChange} 
+    className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+    pattern="[0-9]{10}" 
+    required 
+    title="Please enter a 10-digit mobile number"
+  />
+</div>
+<div className="mb-4">
+  <label className="block text-gray-700">Daily Wages</label>
+  <input 
+    type="number" 
+    name="dailyWages" 
+    value={form.dailyWages} 
+    onChange={handleChange} 
+    className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+    required 
+    title="Please enter a valid number for daily wages"
+  />
           {errors.dailyWages && <p className="text-red-500 text-sm">{errors.dailyWages}</p>}
         </div>
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">
