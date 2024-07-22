@@ -1,5 +1,5 @@
 const Order = require('../models/Order');
-const Customer = require('../models/Customer'); // Add this import
+const Customer = require('../models/Customer');
 
 const formatName = (name) => {
   return name
@@ -11,14 +11,27 @@ const formatName = (name) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { customerName, ...orderData } = req.body;
+    const { customerName, lineItems, ...orderData } = req.body;
     const formattedName = formatName(customerName);
     const customer = await Customer.findOne({ name: formattedName });
+
     if (!customer) {
       return res.status(400).json({ message: 'Customer does not exist' });
     }
-    // Create the order with the customer's ID
-    const order = new Order({ ...orderData, customerId: customer.customerId, customerName: formattedName });
+
+    // Format line items with auto-generated line numbers
+    const formattedLineItems = lineItems.map((item, index) => ({
+      ...item,
+      lineItem: index + 1
+    }));
+
+    const order = new Order({
+      ...orderData,
+      customerId: customer.customerId,
+      customerName: formattedName,
+      lineItems: formattedLineItems
+    });
+
     await order.save();
     res.status(201).json(order);
   } catch (error) {
@@ -29,24 +42,26 @@ exports.createOrder = async (req, res) => {
 exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { customerName, ...orderData } = req.body;
-
-    // Format customerName
+    const { customerName, lineItems, ...orderData } = req.body;
     const formattedName = formatName(customerName);
-
-    // Check if the customer exists
     const customer = await Customer.findOne({ name: formattedName });
 
     if (!customer) {
       return res.status(400).json({ message: 'Customer does not exist' });
     }
 
-    // Update the order with the customer's ID
-    const order = await Order.findByIdAndUpdate(id, { ...orderData, customerId: customer.customerId, customerName: formattedName }, { new: true });
-    if (!order) {
+    const updatedOrder = await Order.findByIdAndUpdate(id, {
+      ...orderData,
+      customerId: customer.customerId,
+      customerName: formattedName,
+      lineItems: lineItems.map((item, index) => ({ ...item, lineItem: index + 1 }))
+    }, { new: true });
+
+    if (!updatedOrder) {
       return res.status(404).json({ message: 'Order not found' });
     }
-    res.json(order);
+
+    res.status(200).json(updatedOrder);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -55,11 +70,13 @@ exports.updateOrder = async (req, res) => {
 exports.deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findByIdAndDelete(id);
-    if (!order) {
+    const deletedOrder = await Order.findByIdAndDelete(id);
+
+    if (!deletedOrder) {
       return res.status(404).json({ message: 'Order not found' });
     }
-    res.json({ message: 'Order deleted' });
+
+    res.status(200).json({ message: 'Order deleted successfully' });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -68,21 +85,18 @@ exports.deleteOrder = async (req, res) => {
 exports.getOrders = async (req, res) => {
   try {
     const orders = await Order.find();
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.updateOrder = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const order = await Order.findByIdAndUpdate(id, req.body, { new: true });
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
-    res.json(order);
+    res.status(200).json(orders);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.getCustomers = async (req, res) => {
+  try {
+    const customers = await Customer.find();
+    res.status(200).json(customers);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+  

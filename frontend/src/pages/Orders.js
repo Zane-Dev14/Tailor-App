@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getOrders, createOrder, updateOrder, deleteOrder, getCustomers } from '../api/api';  // Assuming you have a getCustomers API call
+import { getOrders, createOrder, updateOrder, deleteOrder, getCustomers } from '../api/api';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -7,10 +7,8 @@ const Orders = () => {
   const [form, setForm] = useState({
     date: '',
     customerName: '',
-    lineItem: '',
-    description: '',
+    lineItems: [{ description: '', estimateAmount: '' }],
     deliveryDate: '',
-    estimateAmount: '',
     remarks: ''
   });
   const [editMode, setEditMode] = useState(false);
@@ -28,7 +26,7 @@ const Orders = () => {
 
     const fetchCustomers = async () => {
       try {
-        const res = await getCustomers();  // Fetch all customers
+        const res = await getCustomers();
         setCustomers(res);
       } catch (error) {
         console.error('Error fetching customers:', error);
@@ -44,17 +42,30 @@ const Orders = () => {
     setForm({ ...form, [name]: value });
   };
 
+  const handleLineItemChange = (index, e) => {
+    const { name, value } = e.target;
+    const newLineItems = form.lineItems.map((item, i) => (i === index ? { ...item, [name]: value } : item));
+    setForm({ ...form, lineItems: newLineItems });
+  };
+
+  const addLineItem = () => {
+    setForm({ ...form, lineItems: [...form.lineItems, { description: '', estimateAmount: '' }] });
+  };
+
+  const removeLineItem = (index) => {
+    const newLineItems = form.lineItems.filter((_, i) => i !== index);
+    setForm({ ...form, lineItems: newLineItems });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Format customer name
       const formattedName = form.customerName
         .toLowerCase()
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-      // Check if customer exists
       const customerExists = customers.some(customer => customer.name === formattedName);
 
       if (!customerExists) {
@@ -62,7 +73,7 @@ const Orders = () => {
         return;
       }
 
-      const orderData = { ...form };
+      const orderData = { ...form, customerName: formattedName };
       if (editMode) {
         await updateOrder(currentId, orderData);
         setEditMode(false);
@@ -71,14 +82,11 @@ const Orders = () => {
         await createOrder(orderData);
       }
 
-      // Clear form and fetch updated orders
       setForm({
         date: '',
         customerName: '',
-        lineItem: '',
-        description: '',
+        lineItems: [{ description: '', estimateAmount: '' }],
         deliveryDate: '',
-        estimateAmount: '',
         remarks: ''
       });
 
@@ -95,10 +103,8 @@ const Orders = () => {
     setForm({
       date: order.date,
       customerName: order.customerName,
-      lineItem: order.lineItem,
-      description: order.description,
+      lineItems: order.lineItems,
       deliveryDate: order.deliveryDate,
-      estimateAmount: order.estimateAmount,
       remarks: order.remarks
     });
   };
@@ -124,39 +130,64 @@ const Orders = () => {
             name="date" 
             value={form.date} 
             onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            required 
           />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700">Customer Name</label>
-          <input 
-            type="text" 
+          <select 
             name="customerName" 
             value={form.customerName} 
             onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            required
+          >
+            <option value="">Select Customer</option>
+            {customers.map(customer => (
+              <option key={customer._id} value={customer.name}>{customer.name}</option>
+            ))}
+          </select>
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Line Item</label>
-          <input 
-            type="number" 
-            name="lineItem" 
-            value={form.lineItem} 
-            onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Description</label>
-          <input 
-            type="text" 
-            name="description" 
-            value={form.description} 
-            onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
+        {form.lineItems.map((item, index) => (
+          <div key={index} className="mb-4">
+            <label className="block text-gray-700">Line Item {index + 1}</label>
+            <input 
+              type="text" 
+              name="description" 
+              placeholder="Description" 
+              value={item.description} 
+              onChange={(e) => handleLineItemChange(index, e)} 
+              className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2" 
+              required 
+            />
+            <input 
+              type="number" 
+              name="estimateAmount" 
+              placeholder="Estimate Amount" 
+              value={item.estimateAmount} 
+              onChange={(e) => handleLineItemChange(index, e)} 
+              className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+              required 
+            />
+            {form.lineItems.length > 1 && (
+              <button 
+                type="button" 
+                onClick={() => removeLineItem(index)} 
+                className="mt-2 px-3 py-2 bg-red-500 text-white rounded-md"
+              >
+                Remove Line Item
+              </button>
+            )}
+          </div>
+        ))}
+        <button 
+          type="button" 
+          onClick={addLineItem} 
+          className="mt-2 px-3 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Add Line Item
+        </button>
         <div className="mb-4">
           <label className="block text-gray-700">Delivery Date</label>
           <input 
@@ -164,17 +195,8 @@ const Orders = () => {
             name="deliveryDate" 
             value={form.deliveryDate} 
             onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Estimate Amount</label>
-          <input 
-            type="number" 
-            name="estimateAmount" 
-            value={form.estimateAmount} 
-            onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            required 
           />
         </div>
         <div className="mb-4">
@@ -183,59 +205,70 @@ const Orders = () => {
             name="remarks" 
             value={form.remarks} 
             onChange={handleChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
           />
         </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">
-          {editMode ? 'Update Order' : 'Add Order'}
+        <button 
+          type="submit" 
+          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md"
+        >
+          {editMode ? 'Update Order' : 'Create Order'}
         </button>
       </form>
       <div>
-        <h2 className="text-xl font-bold mb-4">Existing Orders</h2>
-        <table className="w-full border border-gray-300">
-          <thead>
-            <tr>
-              <th className="border px-4 py-2">Date</th>
-              <th className="border px-4 py-2">Customer Name</th>
-              <th className="border px-4 py-2">Line Item</th>
-              <th className="border px-4 py-2">Description</th>
-              <th className="border px-4 py-2">Delivery Date</th>
-              <th className="border px-4 py-2">Estimate Amount</th>
-              <th className="border px-4 py-2">Remarks</th>
-              <th className="border px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map(order => (
-              <tr key={order._id}>
-                <td className="border px-4 py-2">{new Date(order.date).toLocaleDateString()}</td>
-                <td className="border px-4 py-2">{order.customerName}</td>
-                <td className="border px-4 py-2">{order.lineItem}</td>
-                <td className="border px-4 py-2">{order.description}</td>
-                <td className="border px-4 py-2">{new Date(order.deliveryDate).toLocaleDateString()}</td>
-                <td className="border px-4 py-2">{order.estimateAmount}</td>
-                <td className="border px-4 py-2">{order.remarks}</td>
-                <td className="border px-4 py-2">
+      <h2 className="text-xl font-bold mb-4">Existing Orders</h2>
+      <table className="min-w-full bg-white border border-gray-300">
+        <thead>
+          <tr>
+            <th className="py-2 px-4 border-b">Date</th>
+            <th className="py-2 px-4 border-b">Customer #</th>
+            <th className="py-2 px-4 border-b">Customer Name</th>
+            <th className="py-2 px-4 border-b">Order #</th>
+            <th className="py-2 px-4 border-b">Line Item</th>
+            <th className="py-2 px-4 border-b">Description</th>
+            <th className="py-2 px-4 border-b">Delivery Date</th>
+            <th className="py-2 px-4 border-b">Estimate Amount</th>
+            <th className="py-2 px-4 border-b">Remarks</th>
+            <th className="py-2 px-4 border-b">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map(order => (
+            order.lineItems.map(item => (
+              <tr key={`${order._id}-${item.lineItem}`}>
+                <td className="py-2 px-4 border-b">{new Date(order.date).toLocaleDateString('en-GB')}</td>
+                <td className="py-2 px-4 border-b">{order.customerId}</td>
+                <td className="py-2 px-4 border-b">{order.customerName}</td>
+                <td className="py-2 px-4 border-b">{order.orderId}</td>
+                <td className="py-2 px-4 border-b">{item.lineItem}</td>
+                <td className="py-2 px-4 border-b">{item.description}</td>
+                <td className="py-2 px-4 border-b">{new Date(order.deliveryDate).toLocaleDateString('en-GB')}</td>
+                <td className="py-2 px-4 border-b">{item.estimateAmount}</td>
+                <td className="py-2 px-4 border-b">{order.remarks}</td>
+                <td className="py-2 px-4 border-b">
                   <button 
+                    type="button" 
                     onClick={() => handleEdit(order)} 
-                    className="bg-yellow-500 text-white px-2 py-1 rounded-md"
+                    className="ml-2 px-3 py-2 bg-yellow-500 text-white rounded-md"
                   >
                     Edit
                   </button>
                   <button 
+                    type="button" 
                     onClick={() => handleDelete(order._id)} 
-                    className="bg-red-600 text-white px-2 py-1 rounded-md ml-2"
+                    className="ml-2 px-3 py-2 bg-red-500 text-white rounded-md"
                   >
                     Delete
                   </button>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            ))
+          ))}
+        </tbody>
+      </table>
     </div>
-  );
+  </div>
+);  
 };
 
 export default Orders;

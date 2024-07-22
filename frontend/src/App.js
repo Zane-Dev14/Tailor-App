@@ -16,7 +16,7 @@ function App() {
                     <Route path="/employees" component={Employees} />
                     <Route path="/customers" component={Customers} />
                     <Route path="/orders" component={Orders} />
-                    <Route path="/daily-output" component={DailyOutput} />
+                    <Route path="/dailyoutputs" component={DailyOutput} />
                 </Switch>
             </div>
         </Router>

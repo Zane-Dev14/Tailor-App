@@ -15,10 +15,12 @@ export const createEmployee = async (employee) => {
 
 export const getEmployees = async () => {
   try {
-      const response = await API.get('/employees');
-      return response.data;
+    const response = await API.get('/employees');
+    console.log('API Response:', response.data); // Log the response data to inspect it
+    return response.data;
   } catch (error) {
-      throw error.response.data;
+    console.error('Error fetching employees:', error.response ? error.response.data : error.message);
+    throw error.response ? error.response.data : error.message; // Ensure error message is clear
   }
 };
 
@@ -117,5 +119,10 @@ export const deleteCustomer = async (id) => {
       throw error.response.data;
   }
 };
-    
+const API_URL = 'http://localhost:3000/api/dailyoutputs';
+
+export const getDailyOutputs = () => axios.get(API_URL);
+export const createDailyOutput = (data) => axios.post(API_URL, data);
+export const updateDailyOutput = (id, data) => axios.put(`${API_URL}/${id}`, data);
+export const deleteDailyOutput = (id) => axios.delete(`${API_URL}/${id}`);
       export default API;
