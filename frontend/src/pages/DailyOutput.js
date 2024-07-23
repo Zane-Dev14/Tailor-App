@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { getEmployees, getOrders, createDailyOutput, getDailyOutputs, updateDailyOutput, deleteDailyOutput } from '../api/api';
+import {
+  getDailyOutputs,
+  createDailyOutput,
+  updateDailyOutput,
+  deleteDailyOutput,
+  getEmployees,
+  getOrders
+} from '../api/api';
 
 const DailyOutput = () => {
   const [dailyOutputs, setDailyOutputs] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const [form, setForm] = useState({
     date: new Date().toISOString().split('T')[0],
     empId: '',
@@ -17,7 +25,7 @@ const DailyOutput = () => {
   });
   const [employees, setEmployees] = useState([]);
   const [orders, setOrders] = useState([]);
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,34 +34,55 @@ const DailyOutput = () => {
           getEmployees(),
           getOrders()
         ]);
-        console.log('Fetched Employees:', fetchedEmployees); // Check the structure of this data
+        console.log('Fetched Orders:', fetchedOrders);
         setDailyOutputs(fetchedDailyOutputs);
         setEmployees(fetchedEmployees);
         setOrders(fetchedOrders);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(`name: ${name}, value: ${value}`);
     setForm(prevForm => {
       const updatedForm = { ...prevForm, [name]: value };
       if (name === 'status' || name === 'estimateAmount') {
         updatedForm.value = updatedForm.status * updatedForm.estimateAmount;
       }
+      console.log('updatedForm:', updatedForm);
       return updatedForm;
     });
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    setLoading(true);
+
+    // Form validation
+    if (!form.date || !form.empId || !form.orderId || !form.lineItem || !form.description || !form.customerName || form.status === '' || form.value === '') {
+      setErrorMessage('Please fill out all fields.');
+      setLoading(false);
+      return;
+    }
+
+    if (isNaN(form.status) || isNaN(form.value)) {
+      setErrorMessage('Status and Value must be numbers.');
+      setLoading(false);
+      return;
+    }
+
     try {
       await createDailyOutput(form);
-      const fetchedDailyOutputs = await getDailyOutputs();
-      setDailyOutputs(fetchedDailyOutputs);
+      const response = await getDailyOutputs();
+      setDailyOutputs(response);
       setForm({
         date: new Date().toISOString().split('T')[0],
         empId: '',
@@ -67,7 +96,9 @@ const DailyOutput = () => {
         estimateAmount: 0,
       });
     } catch (error) {
-      console.error("Error creating daily output:", error);
+      setErrorMessage(`Error creating daily output: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,145 +118,164 @@ const DailyOutput = () => {
     }
   };
 
+  const EmployeeDropdown = ({ employees, selectedEmpId, onEmpChange }) => (
+    <select
+      name="empId"
+      value={selectedEmpId}
+      onChange={onEmpChange}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+    >
+      <option value="">Select Employee</option>
+      {employees.map(employee => (
+        <option key={employee._id} value={employee._id}>
+          {employee.empName}
+        </option>
+      ))}
+    </select>
+  );
+  
+  const getEmployeeId = (empId) => {
+    const employee = employees.find(emp => emp._id === empId);
+    return employee ? employee.empId : 'N/A'; // Return 'N/A' if employee is not found
+  };
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-4">Daily Output</h1>
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="mb-4">
-          <label className="block text-gray-700">Date</label>
-          <input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Employee</label>
-          <select
-            name="empId"
-            value={form.empId}
-            onChange={(e) => {
-              const selectedEmp = employees.find(emp => emp.empId === e.target.value);
-              if (selectedEmp) {
-                setForm(prevForm => ({
-                  ...prevForm,
-                  empId: selectedEmp.empId,
-                  empName: selectedEmp.name
-                }));
-              }
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+      {loading ? <p>Loading...</p> : (
+        <form onSubmit={handleSubmit} className="mb-6">
+          <div className="mb-4">
+            <label className="block text-gray-700">Date</label>
+            <input
+              type="date"
+              name="date"
+              value={form.date}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Employee</label>
+            <EmployeeDropdown
+              employees={employees}
+              selectedEmpId={form.empId}
+              onEmpChange={(e) => {
+                const selectedEmployee = employees.find(emp => emp._id === e.target.value);
+                setForm({
+                  ...form,
+                  empId: selectedEmployee?._id || '',
+                  empName: selectedEmployee?.empName || '',
+                });
+              }}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Order</label>
+            <select
+  name="orderId"
+  value={form.orderId}
+  onChange={(e) => {
+    const selectedOrder = orders.find(order => String(order.orderId) === String(e.target.value));
+    console.log('Selected Order:', selectedOrder);
+    setForm({
+      ...form,
+      orderId: selectedOrder?.orderId || '',
+      lineItem: selectedOrder?.lineItem || '',
+      customerName: selectedOrder?.customerName || '',
+      description: selectedOrder?.description || '',
+      estimateAmount: selectedOrder?.estimateAmount || 0,
+      value: (selectedOrder?.estimateAmount || 0) * form.status
+    });
+  }}
+  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+  required
+>
+  <option value="">Select Order</option>
+  {orders.map(order => (
+    <option key={order._id} value={order.orderId}>
+      {order.description}
+    </option>
+  ))}
+</select>
+
+
+
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Status</label>
+            <input
+              type="number"
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Value</label>
+            <input
+              type="number"
+              name="value"
+              value={form.value}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+            />
+          </div>
+          {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md"
           >
-            <option value="">Select Employee</option>
-            {employees.map(emp => (
-              <option key={emp.empId} value={emp.empId}>
-                {emp.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Order</label>
-          <select
-            name="orderId"
-            value={form.orderId}
-            onChange={(e) => {
-              const selectedOrder = orders.find(order => order._id === e.target.value);
-              if (selectedOrder) {
-                setForm(prevForm => ({
-                  ...prevForm,
-                  orderId: selectedOrder._id,
-                  lineItem: selectedOrder.lineItem,
-                  customerName: selectedOrder.customerName,
-                  description: selectedOrder.description,
-                  estimateAmount: selectedOrder.estimateAmount,
-                  value: selectedOrder.estimateAmount * prevForm.status
-                }));
-              }
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="">Select Order</option>
-            {orders.map(order => (
-              <option key={order._id} value={order._id}>
-                {order.description}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Status</label>
-          <input
-            type="number"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Value</label>
-          <input
-            type="number"
-            name="value"
-            value={form.value}
-            readOnly
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">Add Daily Output</button>
-      </form>
-      <table className="min-w-full bg-white rounded-lg shadow-md">
+            Submit
+          </button>
+        </form>
+      )}
+      <table className="min-w-full divide-y divide-gray-200">
         <thead>
           <tr>
-            <th className="px-4 py-2">Date</th>
-            <th className="px-4 py-2">Employee ID</th>
-            <th className="px-4 py-2">Employee Name</th>
-            <th className="px-4 py-2">Order ID</th>
-            <th className="px-4 py-2">Line Item</th>
-            <th className="px-4 py-2">Description</th>
-            <th className="px-4 py-2">Customer Name</th>
-            <th className="px-4 py-2">Status</th>
-            <th className="px-4 py-2">Value</th>
-            <th className="px-4 py-2">Actions</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Date</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Employee ID</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Employee Name</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Order ID</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Line Item</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Description</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Customer Name</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Status</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Value</th>
+            <th className="py-2 px-4 bg-gray-100 border-b">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(dailyOutputs) && dailyOutputs.length > 0 ? (
-            dailyOutputs.map((output) => (
-              <tr key={output._id}>
-                <td className="border px-4 py-2">{output.date.split('T')[0]}</td>
-                <td className="border px-4 py-2">{output.empId}</td>
-                <td className="border px-4 py-2">{output.empName}</td>
-                <td className="border px-4 py-2">{output.orderId}</td>
-                <td className="border px-4 py-2">{output.lineItem}</td>
-                <td className="border px-4 py-2">{output.description}</td>
-                <td className="border px-4 py-2">{output.customerName}</td>
-                <td className="border px-4 py-2">{output.status}</td>
-                <td className="border px-4 py-2">{output.value}</td>
-                <td className="border px-4 py-2">
-                  <button
-                    onClick={() => handleEdit(output)}
-                    className="bg-green-600 text-white px-2 py-1 rounded-md mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(output._id)}
-                    className="bg-red-600 text-white px-2 py-1 rounded-md"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="10" className="border px-4 py-2 text-center">No data available</td>
+          {dailyOutputs.map(output => (
+            <tr key={output._id}>
+              <td className="py-2 px-4 border-b">{new Date(output.date).toLocaleDateString('en-GB')}</td>
+              <td className="py-2 px-4 border-b">{getEmployeeId(output.empId)}</td>             
+               <td className="py-2 px-4 border-b">{output.empName}</td>
+              <td className="py-2 px-4 border-b">{orders.orderId}</td>
+              <td className="py-2 px-4 border-b">{output.lineItem}</td>
+              <td className="py-2 px-4 border-b">{output.description}</td>
+              <td className="py-2 px-4 border-b">{output.customerName}</td>
+              <td className="py-2 px-4 border-b">{output.status}</td>
+              <td className="py-2 px-4 border-b">{output.value}</td>
+              <td className="py-2 px-4 border-b">
+                <button 
+                  type="button" 
+                  onClick={() => handleEdit(output)} 
+                  className="ml-2 px-3 py-2 bg-yellow-500 text-white rounded-md"
+                >
+                  Edit
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => handleDelete(output._id)} 
+                  className="ml-2 px-3 py-2 bg-red-500 text-white rounded-md"
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          )}
+          ))}
         </tbody>
       </table>
     </div>

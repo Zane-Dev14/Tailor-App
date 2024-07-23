@@ -12,17 +12,17 @@ export const createEmployee = async (employee) => {
       throw error.response.data;
   }
 };
-
 export const getEmployees = async () => {
   try {
     const response = await API.get('/employees');
-    console.log('API Response:', response.data); // Log the response data to inspect it
+    console.log('Employees fetched:', response.data); // Add logging to see the response
     return response.data;
   } catch (error) {
     console.error('Error fetching employees:', error.response ? error.response.data : error.message);
-    throw error.response ? error.response.data : error.message; // Ensure error message is clear
+    throw error.response ? error.response.data : error.message; // Adjust error handling
   }
 };
+
 
 export const updateEmployee = async (id, employee) => {
   try {
@@ -119,10 +119,40 @@ export const deleteCustomer = async (id) => {
       throw error.response.data;
   }
 };
-const API_URL = 'http://localhost:3000/api/dailyoutputs';
+export const createDailyOutput = async (dailyOutput) => {
+  try {
+    const response = await API.post('/dailyoutputs', dailyOutput);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
 
-export const getDailyOutputs = () => axios.get(API_URL);
-export const createDailyOutput = (data) => axios.post(API_URL, data);
-export const updateDailyOutput = (id, data) => axios.put(`${API_URL}/${id}`, data);
-export const deleteDailyOutput = (id) => axios.delete(`${API_URL}/${id}`);
+export const updateDailyOutput = async (id, dailyOutput) => {
+  try {
+    const response = await API.put(`/dailyoutputs/${id}`, dailyOutput);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const deleteDailyOutput = async (id) => {
+  try {
+    const response = await API.delete(`/dailyoutputs/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const getDailyOutputs = async () => {
+  try {
+      const response = await API.get('/dailyoutputs');
+      return response.data;
+  } catch (error) {
+      throw error.response.data;
+  }
+};
+
       export default API;
