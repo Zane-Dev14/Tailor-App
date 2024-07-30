@@ -5,6 +5,9 @@ import Customers from './pages/Customers';
 import Orders from './pages/Orders';
 import DailyOutput from './pages/DailyOutput';
 import Home from './pages/Home';
+import Login from './pages/Login';
+import './index.css';
+import './styles/tailwind.css';
 
 function App() {
     return (
@@ -17,6 +20,8 @@ function App() {
                     <Route path="/customers" component={Customers} />
                     <Route path="/orders" component={Orders} />
                     <Route path="/dailyoutputs" component={DailyOutput} />
+                    <Route path="/login" component={Login} />
+                    
                 </Switch>
             </div>
         </Router>

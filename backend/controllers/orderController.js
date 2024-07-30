@@ -66,7 +66,6 @@ exports.updateOrder = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
 exports.deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -82,6 +81,7 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+
 exports.getOrders = async (req, res) => {
   try {
     const orders = await Order.find();
@@ -89,7 +89,7 @@ exports.getOrders = async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
-};
+};  
 
 exports.getCustomers = async (req, res) => {
   try {
