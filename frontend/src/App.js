@@ -6,22 +6,22 @@ import Orders from './pages/Orders';
 import DailyOutput from './pages/DailyOutput';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import PrivateRoute from './components/private'; // Ensure this path is correct
 import './index.css';
 import './styles/tailwind.css';
 
 function App() {
-    return (
+    return (    
         <Router>
             <div>
                 <Navbar />
                 <Switch>
-                    <Route path="/" exact component={Home} />
-                    <Route path="/employees" component={Employees} />
-                    <Route path="/customers" component={Customers} />
-                    <Route path="/orders" component={Orders} />
-                    <Route path="/dailyoutputs" component={DailyOutput} />
                     <Route path="/login" component={Login} />
-                    
+                    <PrivateRoute path="/" exact component={Home} />
+                    <PrivateRoute path="/employees" component={Employees} />
+                    <PrivateRoute path="/customers" component={Customers} />
+                    <PrivateRoute path="/orders" component={Orders} />
+                    <PrivateRoute path="/dailyoutputs" component={DailyOutput} />
                 </Switch>
             </div>
         </Router>

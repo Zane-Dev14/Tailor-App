@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  getDailyOutputs,
-  createDailyOutput,
-  updateDailyOutput,
-  deleteDailyOutput,
-  getEmployees,
-  getOrders
-} from '../api/api';
+import { getDailyOutputs, createDailyOutput, updateDailyOutput, deleteDailyOutput, getEmployees, getOrders } from '../api/api';
 
 const DailyOutput = () => {
   const [dailyOutputs, setDailyOutputs] = useState([]);
@@ -16,6 +9,7 @@ const DailyOutput = () => {
     empId: '',
     empName: '',
     orderId: '',
+    lineItemId: '',
     lineItem: '',
     description: '',
     customerName: '',
@@ -35,7 +29,6 @@ const DailyOutput = () => {
           getEmployees(),
           getOrders()
         ]);
-        console.log('Fetched Orders:', fetchedOrders); // Confirm fetched orders
         setDailyOutputs(fetchedDailyOutputs);
         setEmployees(fetchedEmployees);
         setOrders(fetchedOrders);
@@ -52,11 +45,30 @@ const DailyOutput = () => {
     const { name, value } = e.target;
     setForm(prevForm => {
       const updatedForm = { ...prevForm, [name]: value };
+
+      // Update `value` when `status` or `estimateAmount` changes
       if (name === 'status' || name === 'estimateAmount') {
         updatedForm.value = updatedForm.status * updatedForm.estimateAmount;
       }
+      
       return updatedForm;
     });
+  };
+
+  const handleOrderChange = (e) => {
+    const [orderId, lineItemId] = e.target.value.split('-');
+    const selectedOrder = orders.find(order => order._id === orderId);
+    const selectedLineItem = selectedOrder?.lineItems.find(item => item.itemId === lineItemId);
+
+    setForm(prevForm => ({
+      ...prevForm,
+      orderId: selectedOrder?.orderId || '',
+      lineItemId: lineItemId || '',
+      lineItem: selectedLineItem?.description || '',
+      customerName: selectedOrder?.customerName || '',
+      estimateAmount: selectedLineItem?.estimateAmount || 0,
+      value: (selectedLineItem?.estimateAmount || 0) * prevForm.status
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -65,7 +77,7 @@ const DailyOutput = () => {
     setLoading(true);
 
     // Form validation
-    if (!form.date || !form.empId || !form.orderId || !form.lineItem || !form.description || !form.customerName || form.status === '' || form.value === '') {
+    if (!form.date || !form.empId || !form.orderId || !form.lineItemId || !form.lineItem || !form.description || !form.customerName || form.status === '' || form.value === '') {
       setErrorMessage('Please fill out all fields.');
       setLoading(false);
       return;
@@ -86,6 +98,7 @@ const DailyOutput = () => {
         empId: '',
         empName: '',
         orderId: '',
+        lineItemId: '',
         lineItem: '',
         description: '',
         customerName: '',
@@ -117,11 +130,13 @@ const DailyOutput = () => {
   };
 
   const populateOrderDropdown = (orders) => {
-    return orders.map((order) => (
-      <option key={order._id} value={order.orderId}>
-        {order.customerName} - {order.orderId}
-      </option>
-    ));
+    return orders.flatMap(order =>
+      order.lineItems.map(lineItem => (
+        <option key={`${order._id}-${lineItem.itemId}`} value={`${order._id}-${lineItem.itemId}`}>
+          {order.customerName} - {lineItem.description} ({lineItem.itemId})
+        </option>
+      ))
+    );
   };
 
   const EmployeeDropdown = ({ employees, selectedEmpId, onEmpChange }) => (
@@ -140,10 +155,6 @@ const DailyOutput = () => {
     </select>
   );
 
-  const getEmployeeId = (empId) => {
-    const employee = employees.find(emp => emp._id === empId);
-    return employee ? employee.empId : 'N/A'; // Return 'N/A' if employee is not found
-  };
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Daily Output</h1>
@@ -179,19 +190,8 @@ const DailyOutput = () => {
             <label className="block text-gray-700 font-semibold mb-2">Order</label>
             <select
               name="orderId"
-              value={form.orderId}
-              onChange={(e) => {
-                const selectedOrder = orders.find(order => String(order.orderId) === String(e.target.value));
-                setForm({
-                  ...form,
-                  orderId: selectedOrder?.orderId || '',
-                  lineItem: selectedOrder?.lineItem || '',
-                  customerName: selectedOrder?.customerName || '',
-                  description: selectedOrder?.description || '',
-                  estimateAmount: selectedOrder?.estimateAmount || 0,
-                  value: (selectedOrder?.estimateAmount || 0) * form.status
-                });
-              }}
+              value={form.orderId ? `${form.orderId}-${form.lineItemId}` : ''}
+              onChange={handleOrderChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             >
@@ -232,39 +232,48 @@ const DailyOutput = () => {
       <table className="min-w-full divide-y divide-gray-200 mt-8">
         <thead>
           <tr>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Date</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Employee ID</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Employee Name</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Order ID</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Line Item</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Customer Name</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Status</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Value</th>
-            <th className="py-3 px-6 bg-gray-50 border-b text-left text-gray-600">Actions</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Date</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Employee</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Order</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Line Item</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Description</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Customer</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Status</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Value</th>
+            <th className="py-3 px-6 bg-gray-50 border-b border-gray-200">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {dailyOutputs.map(output => (
             <tr key={output._id}>
-              <td className="py-3 px-6">{output.date}</td>
-              <td className="py-3 px-6">{getEmployeeId(output.empId)}</td>
-              <td className="py-3 px-6">{output.empName}</td>
-              <td className="py-3 px-6">{output.orderId}</td>
-              <td className="py-3 px-6">{output.lineItem}</td>
-              <td className="py-3 px-6">{output.customerName}</td>
-              <td className="py-3 px-6">{output.status}</td>
-              <td className="py-3 px-6">{output.value}</td>
-              <td className="py-3 px-6">
-                <button onClick={() => handleEdit(output)} className="mr-2 px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition duration-300">Edit</button>
-                <button onClick={() => handleDelete(output._id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Delete</button>
+              <td className="py-3 px-6 text-sm font-medium text-gray-900">{output.date}</td>
+              <td className="py-3 px-6 text-sm text-gray-500">{output.empName}</td>
+              <td className="py-3 px-6 text-sm text-gray-500">{output.orderId}</td>
+              <td className="py-3 px-6 text-sm text-gray-500">{output.lineItemId}</td>
+              <td className="py-3 px-6 text-sm text-gray-500">{output.lineItem}</td>
+              <td className="py-3 px-6 text-sm text-gray-500">{output.customerName}</td>
+              <td className="py-3 px-6 text-sm text-gray-500">{output.status}</td>
+              <td className="py-3 px-6 text-sm text-gray-500">{output.value}</td>
+              <td className="py-3 px-6 text-sm font-medium">
+                <button
+                  onClick={() => handleEdit(output)}
+                  className="text-blue-600 hover:text-blue-900"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(output._id)}
+                  className="ml-4 text-red-600 hover:text-red-900"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-);
-
+  );
 };
 
 export default DailyOutput;

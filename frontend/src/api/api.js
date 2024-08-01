@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API = axios.create({
   baseURL: 'http://localhost:3000/api', // Adjust this base URL according to your backend setup
+  withCredentials: true,
 });
 
 export const createEmployee = async (employee) => {
@@ -86,12 +87,21 @@ export const deleteEmployee = async (id) => {
   };
   export const login = async (credentials) => {
     try {
-        const response = await API.post('/auth/login', credentials);
+        const response = await API.post('/login', credentials);
         return response.data;
     } catch (error) {
-        throw error.response.data;
+        throw error.response ? error.response.data : error.message;
     }
+};export const logout = async () => {
+  try {
+      const response = await API.post('/login/logout'); // Ensure the URL matches
+      return response.data;
+  } catch (error) {
+      throw error.response ? error.response.data : error.message;
+  }
 };
+
+
 export const createCustomer = async (customer) => {
   try {
       const response = await API.post('/customers', customer);

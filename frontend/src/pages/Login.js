@@ -1,17 +1,20 @@
+// components/Login.js
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { login } from '../api/api';
 
 const Login = () => {
     const [authId, setAuthId] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const history = useHistory();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await login({ authId, password });
-            localStorage.setItem('token', response.token);
-            // Redirect to dashboard or home page
+            localStorage.setItem('user', JSON.stringify(response)); // Save user info to localStorage
+            history.push('/'); // Redirect to home page
         } catch (error) {
             setErrorMessage(error.message);
         }

@@ -88,104 +88,105 @@ const Customers = () => {
         }
     };
     return (
-        <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 min-h-screen flex items-center justify-center p-6">
-          <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg p-8 rounded-lg shadow-2xl max-w-lg w-full">
-            <h1 className="text-4xl font-extrabold text-white mb-8 text-center">Customers</h1>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-gray-300 font-semibold mb-2">Customer Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-transparent rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 bg-white bg-opacity-20 text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 font-semibold mb-2">Mobile Number</label>
-                <input
-                  type="tel"
-                  name="mobile"
-                  value={form.mobile}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-transparent rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 bg-white bg-opacity-20 text-white"
-                  pattern="[0-9]{10}"
-                  required
-                  title="Please enter a 10-digit mobile number"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 font-semibold mb-2">Place</label>
-                <input
-                  type="text"
-                  name="place"
-                  value={form.place}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-transparent rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 bg-white bg-opacity-20 text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 font-semibold mb-2">Remarks</label>
-                <input
-                  type="text"
-                  name="remarks"
-                  value={form.remarks}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-transparent rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 bg-white bg-opacity-20 text-white"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-3 rounded-lg font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300"
-              >
-                {editMode ? 'Update Customer' : 'Add Customer'}
-              </button>
-            </form>
-            <div className="mt-8 overflow-x-auto bg-white bg-opacity-10 rounded-lg shadow-lg backdrop-filter backdrop-blur-lg">
-              <table className="min-w-full text-white">
-                <thead>
-                  <tr className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-                    <th className="px-4 py-3">Customer #</th>
-                    <th className="px-4 py-3">Customer Name</th>
-                    <th className="px-4 py-3">Mobile #</th>
-                    <th className="px-4 py-3">Place</th>
-                    <th className="px-4 py-3">Remarks</th>
-                    <th className="px-4 py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {customers.map((customer) => (
-                    <tr key={customer._id} className="even:bg-white even:bg-opacity-20 odd:bg-white odd:bg-opacity-10">
-                      <td className="border-t border-gray-300 px-4 py-3">{customer.customerId}</td>
-                      <td className="border-t border-gray-300 px-4 py-3">{customer.name}</td>
-                      <td className="border-t border-gray-300 px-4 py-3">{customer.mobile}</td>
-                      <td className="border-t border-gray-300 px-4 py-3">{customer.place}</td>
-                      <td className="border-t border-gray-300 px-4 py-3">{customer.remarks}</td>
-                      <td className="border-t border-gray-300 px-4 py-3 flex space-x-2">
-                        <button
-                          onClick={() => handleEdit(customer)}
-                          className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(customer._id)}
-                          className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="bg-gradient-to-r from-blue-800 via-purple-800 to-pink-800 min-h-screen flex items-center justify-center p-6">
+        <div className="bg-white shadow-lg rounded-lg max-w-3xl w-full p-8 bg-opacity-90 backdrop-blur-lg border border-gray-200">
+          <h1 className="text-5xl font-bold text-gray-800 mb-8 text-center">Customers</h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Customer Name</label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-gray-900"
+                required
+              />
             </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Mobile Number</label>
+              <input
+                type="tel"
+                name="mobile"
+                value={form.mobile}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-gray-900"
+                pattern="[0-9]{10}"
+                required
+                title="Please enter a 10-digit mobile number"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Place</label>
+              <input
+                type="text"
+                name="place"
+                value={form.place}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-gray-900"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">Remarks</label>
+              <input
+                type="text"
+                name="remarks"
+                value={form.remarks}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-gray-900"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 rounded-lg font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-500 hover:from-blue-700 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 shadow-md"
+            >
+              {editMode ? 'Update Customer' : 'Add Customer'}
+            </button>
+          </form>
+          <div className="mt-8 bg-white rounded-lg shadow-lg overflow-x-auto border border-gray-200">
+            <table className="min-w-full text-gray-900">
+              <thead>
+                <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                  <th className="px-4 py-3">Customer #</th>
+                  <th className="px-4 py-3">Customer Name</th>
+                  <th className="px-4 py-3">Mobile #</th>
+                  <th className="px-4 py-3">Place</th>
+                  <th className="px-4 py-3">Remarks</th>
+                  <th className="px-4 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customers.map((customer) => (
+                  <tr key={customer._id} className="even:bg-gray-100 odd:bg-gray-50 hover:bg-gray-200 transition duration-300">
+                    <td className="border-t border-gray-300 px-4 py-3">{customer.customerId}</td>
+                    <td className="border-t border-gray-300 px-4 py-3">{customer.name}</td>
+                    <td className="border-t border-gray-300 px-4 py-3">{customer.mobile}</td>
+                    <td className="border-t border-gray-300 px-4 py-3">{customer.place}</td>
+                    <td className="border-t border-gray-300 px-4 py-3">{customer.remarks}</td>
+                    <td className="border-t border-gray-300 px-4 py-3 flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(customer)}
+                        className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 shadow-md"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(customer._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300 shadow-md"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      );
+      </div>
+    );
+    
     }      
 
 export default Customers;

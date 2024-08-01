@@ -11,7 +11,7 @@ const Home = () => {
             <Link to="/employees" className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg text-lg transition duration-300 ease-in-out">
                 Manage Employees
             </Link>
-            <Link to="/orders" cl   assName="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg text-lg transition duration-300 ease-in-out">
+            <Link to="/orders" className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg text-lg transition duration-300 ease-in-out">
                 Manage Orders
             </Link>
         </div>

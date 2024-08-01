@@ -1,23 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaHome } from 'react-icons/fa';
+import LogoutButton from './Logout'; // Adjust the path as needed
 
 const Navbar = () => {
     return (
-        <nav className="navbar bg-gradient-to-r from-blue-500 to-indigo-500 p-4 shadow-lg">
+        <nav className="bg-gray-800 p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link to="/" className="text-white text-2xl flex items-center">
-                    <FaHome className="mr-2" />
-                </Link>
-                <div className="space-x-4">
-                    <Link to="/employees" className="text-white text-lg hover:underline">Employees</Link>
-                    <Link to="/orders" className="text-white text-lg hover:underline">Orders</Link>
-                    <Link to="/customers" className="text-white text-lg hover:underline">Customers</Link>
-                    <Link to="/dailyoutputs" className="text-white text-lg hover:underline">Daily Output</Link>
+                <div className="flex space-x-4">
+                    <Link to="/" className="text-white">Home</Link>
+                    <Link to="/employees" className="text-white">Employees</Link>
+                    <Link to="/customers" className="text-white">Customers</Link>
+                    <Link to="/orders" className="text-white">Orders</Link>
+                    <Link to="/dailyoutputs" className="text-white">Daily Output</Link>
                 </div>
+                <LogoutButton />
             </div>
         </nav>
     );
-}
+};
 
 export default Navbar;
